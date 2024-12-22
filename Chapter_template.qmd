@@ -10,6 +10,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+To include your chapter in the webpage, add the file-name of your chapter to _quarto.yml => sidebar => contents
+
 ```{r setup, echo = F, message = F, error=F, include = F}
 
 # knitr global options ----
