@@ -1,0 +1,32 @@
+---
+title: "Chapter_template"
+format: 
+  html:
+    code-fold: false
+    code-tools: true
+editor: source
+author: <enter your name here>
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo = F, message = F, error=F, include = F}
+
+# knitr global options ----
+knitr::opts_chunk$set(fig.pos = 'H',
+                      echo = T,
+                      message = F,
+                      warning = F, 
+                      dpi = 600,
+                      fig.align = "center", 
+                      fig.asp = 0.62) # golden ratio
+
+library(tidyverse)
+library(tidybayes) # nice ploting
+library(brms)
+library(wesanderson)
+
+theme_set(theme_tidybayes())
+
+```
+
