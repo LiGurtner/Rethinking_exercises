@@ -225,9 +225,6 @@ d_m2 <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out = 1000
     mutate(unstd_posterior = likelihood * prior) %>%             # compute product of likelihood and prior
     mutate(posterior = unstd_posterior / sum(unstd_posterior))   # standardize the posterior, so it sums to 1
 
-
-
-d_m2 |> ggplot(aes(x = p_ghypothezised_p_of_waterrid, y = posterior)) + geom_line()
 n_samples <- 10000
 set.seed(3)
 
@@ -264,13 +261,12 @@ dummy_tosses <- rbinom(1000, 9, prob = samples_m2$hypothezised_p_of_water)
 
 mean(dummy_tosses == 6)
 
-
 d_m2 |>  ggplot(aes(x = hypothezised_p_of_water, y= posterior))  + geom_line()
 hist(samples_m2$hypothezised_p_of_water)
 
 ```
 
-#3M6. 
+# 3M6. 
 
 Suppose you want to estimate the Earth's proportion of water very precisely. Specifically, you want the 99% percentile interval of the posterior distribution of p to be only 0.05 wide. This means the distance between the upper and lower bound of the interval should be 0.05. How many times will you have to toss the globe to do this?
 
@@ -291,15 +287,14 @@ samples_m3 <- sample(d_m3$hypothezised_p_of_water,size = 10000, prob = d_m3$post
 
 
 # what is the 99% hdi?
-a <- mode_hdi(samples, .width = 0.99)
+a <- mode_hdi(samples_m3, .width = 0.99)
 a$ymax - a$ymin
 ```
 
 
 
-
-
 # 3H1.
+Using grid approximation, compute the posterior distribution for the probability of a birth being a boy. Assume a uniform prior probability. Which parameter value maximizes the posterior probability?
 
 ```{r hard data}
 birth1 <- c(1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,1,1,0,0,0,1,0,0,0,1,0, 0,0,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1,0,1,0,0,1,1,0,1,0,0,0,0,0,0,0, 1,1,0,1,0,0,1,0,0,0,1,0,0,1,1,1,1,0,1,0,1,1,1,1,1,0,0,1,0,1,1,0, 1,0,1,1,1,0,1,1,1,1) 
@@ -311,45 +306,48 @@ all_births <- c(birth1, birth2)
 ```
 
 
-
-Using grid approximation, compute the posterior distribution for the probability of a birth being a boy. Assume a uniform prior probability. Which parameter value maximizes the posterior probability?
-
 ```{r}
 
 n_births <- length(all_births)
 n_boys <- sum(birth1) + sum(birth2)
 
-d <- tibble(p_boy_hypothetical = seq(from = 0, to  = 1, length.out = 1000), 
+d_h <- tibble(p_boy_hypothetical = seq(from = 0, 
+                                     to  = 1,
+                                     length.out = 1000), 
             prior_boy = 0.01, 
-            likelyhood = dbinom(x = n_boys, size = n_births, prob = p_boy_hypothetical), 
+            likelyhood = dbinom(x = n_boys, 
+                                size = n_births, 
+                                prob = p_boy_hypothetical), 
             post_unst = likelyhood * prior_boy, 
             standartization_term = sum(likelyhood * prior_boy),
             posterior = post_unst / standartization_term)
 
 
+# Which parameter value maximizes the posterior probability?
+d_h |> filter(posterior == max(d_h$posterior))
 
-d |> filter(posterior == max(d$posterior))
 
-
-d |> pivot_longer(names_to = "value_name", values_to = "value", 2:6) |> 
-  ggplot(aes(x = p_boy_hypothetical, y = value, color = value_name)) + geom_point()
+d_h |> pivot_longer(names_to = "value_name", values_to = "value", 2:6) |> 
+  ggplot(aes(x = p_boy_hypothetical, y = value, color = value_name)) + geom_point()+
+  scale_color_manual(values = wes_palette("Darjeeling2", n = 5, type = "discrete"))
 ```
 
 # 3H2.
-
 Using the sample function, draw 10,000 random parameter values from the posterior distribution you calculated above. Use these samples to estimate the 50%, 89%, and 97% highest posterior density intervals.
 
 ```{r}
-samples <- sample(d$p_boy_hypothetical, size = 1e4, prob = d$posterior, replace = T)
+samples_h <- sample(d_h$p_boy_hypothetical, size = 1e4, prob = d_h$posterior, replace = T)
 
-mode_hdi(samples, .width = c(0.5, 0.89, 0.97))
+mode_hdi(samples_h, .width = c(0.5, 0.89, 0.97))
 ```
 
-#3H3. Use rbinom to simulate 10,000 replicates of 200 births. You should end up with 10,000 numbers, each one a count of boys out of 200 births. Compare the distribution of predicted numbers of boys to the actual count in the data (111 boys out of 200 births). There are many good ways to visualize the simulations, but the dens command (part of the rethinking package) is prbably the easiest way in this case. Does it look like the model fits the data well? That is, does the distribution of predictions include the actual observation as a central, likely outcome?
+
+#3H3. 
+Use rbinom to simulate 10,000 replicates of 200 births. You should end up with 10,000 numbers, each one a count of boys out of 200 births. Compare the distribution of predicted numbers of boys to the actual count in the data (111 boys out of 200 births). There are many good ways to visualize the simulations, but the dens command (part of the rethinking package) is probably the easiest way in this case. Does it look like the model fits the data well? That is, does the distribution of predictions include the actual observation as a central, likely outcome?
 
 ```{r}
-#simulating 10'000 cohorts of 200 births to get the number of births from the posterior of estimations of the most likely true percentage of boys
-dummy_data_n_boys<- rbinom(1e5, size = 200, prob = samples)
+#simulating 10'000 cohorts 200 births to get the number of births from the posterior of estimations of the most likely true percentage of boys
+dummy_data_n_boys<- rbinom(1e5, size = 200, prob = samples_h)
 
 break_func <- function(x) {
   length(seq(min(x), max(x), by = 1)) + 1
@@ -367,8 +365,7 @@ Now compare 10,000 counts of boys from 100 simulated first borns only to the num
 
 ```{r}
 
-
-dummy_data_n_boys<- rbinom(1e5, size = 100, prob = samples)
+dummy_data_n_boys<- rbinom(1e5, size = 100, prob = samples_h)
 
 break_func <- function(x) {
   length(seq(min(x), max(x), by = 1)) + 1
@@ -380,26 +377,29 @@ ggplot() + stat_histinterval(aes(x = dummy_data_n_boys), .width = c(0.66, 0.89),
 
 ```
 
+
 # 3H5.
 
 The model assumes that sex of first and second births are independent. To check this assumption, focus now on second births that followed female first borns. Compare 10,000 simulated counts of boys *(coming from the original model which assumes independence)* to only those second births that followed girls. To do this correctly, you need to count the number of first borns who were girls and simulate that many births, 10,000 times. Compare the counts of boys in your simulations to the actual observed count of boys following girls. How does the model look in this light? Any guesses what is going on in these data?
 
 ```{r}
-dummy_data_n_boys<- rbinom(1e5, size = 100, prob = samples)
+dummy_data_n_boys<- rbinom(1e5, size = 100, prob = samples_h)
 
 n_girl1 <- sum(birth1 == 0)
 
-dummy_data_boys_after_girls <- rbinom(n = 1e5, size = n_girl1, prob = samples)
+dummy_data_boys_after_girls <- rbinom(n = 1e5, size = n_girl1, prob = samples_h)
 
 births_data <- tibble(birth1 = birth1, 
                       birth2 = birth2) |> 
   mutate(boy_after_girl = case_when(birth1 == 0 & birth2 == 1 ~ 1, 
                                     .default = 0))
 
-sum(births_data$boy_after_girl)
+true_n_boys_after_girl <- sum(births_data$boy_after_girl)
 
 ggplot() +
    geom_histogram(aes(x = dummy_data_boys_after_girls))  + 
-  geom_vline(xintercept = sum(births_data$boy_after_girl))
+  geom_vline(xintercept = true_n_boys_after_girl)
 
 ```
+
+Conclusion: The model, assuming independence (i.e. drawing from the posterior of all the births `sample_h`) would predict much fewer boys in the second births. So either having a girl alters something biological such that conception of boys becomes more likely, or families who have already a girls are more likely to abort female fetuses and keep the male ones more often. 
