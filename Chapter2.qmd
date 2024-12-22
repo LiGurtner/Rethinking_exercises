@@ -226,59 +226,66 @@ coming from the B/B card = 2/4 = 0.5
 
 Assume again the original card problem, with a single card showing a black side face up. Before looking at the other side, we draw another card from the bag and lay it face up on the table. The face that is shown on the new card is white. Show that the probability that the first card, the one showing a black side, has black on its other side is now 0.75. Use the counting method, if you can. Hint: Treat this like the sequence of globe tosses, counting all the ways to see each observation, for each possible first card.
 
-Round 1: black 
+ww bw bb
 
+::: {.callout-note collapse="true"}
+## counting probabilities
+Round 1: ??  
 Round 2: white 
 
-Total ww =\> 2
-      ww =\> 0 
-      bw =\> 1 0 
-      bb =\> 0
+to be found: p(Round 1 = black)
 
-```         
-                        ww => 2
-```
+*different ways the data could come about:*
 
-bw =\> 1 bw =\> 0 2 bb =\> 0
+- if Round 1 = bw  
+  - Round 2 = ww (side 1 & 2)
+  => 1*2
+  
+- if Round 1 = bb  (side 1 & 2)
+  - Round 2 = bw 
+  - Round 2 = ww (side 1 & 2)
+  => 2*3
+  
+  => total ways of the data = 8
+  => out of these 8, 6 come from a Round 1 == bb card => 
+  
+p(round1 = bb) => 6/8 = 0.75
 
-```         
-                        ww => 2
-```
 
-bb =\> 2 bw =\> 1 4 + 2 = 6 bb =\> 0
+:::
 
-p(round1 = bb) =\> 6/8 = 0.75
+# 2H1. 
+Suppose there are two species of panda bear. Both are equally common in the wild and live in the same places. They look exactly alike and eat the same food, and there is yet no genetic assay capable of telling them apart. They differ however in their family sizes. Species A gives birth to twins 10% of the time, otherwise birthing a single infant. Species B births twins 20% of the time, otherwise birthing singleton infants. Assume these numbers are known with certainty, from many years of field research. Now suppose you are managing a captive panda breeding program. You have a new female panda of unknown species, and she has just given birth to twins. What is the probability that her next birth will also be twins?
 
-2H1. Suppose there are two species of panda bear. Both are equally common in the wild and live in the same places. They look exactly alike and eat the same food, and there is yet no genetic assay capable of telling them apart. They differ however in their family sizes. Species A gives birth to twins 10% of the time, otherwise birthing a single infant. Species B births twins 20% of the time, otherwise birthing singleton infants. Assume these numbers are known with certainty, from many years of field research. Now suppose you are managing a captive panda breeding program. You have a new female panda of unknown species, and she has just given birth to twins. What is the probability that her next birth will also be twins?
-
-p(t\|A) = 0.1 p(t\|B) = 0.2 p(A) = p(B) = 0.5
+p(t\|A) = 0.1  
+p(t\|B) = 0.2  
+p(A) = p(B) = 0.5
 
 ```{r 2H1}
-# get the posterior for the first twins
+# probability of the panda species
 p_A <- 0.5
 p_B <- 0.5
 
-p_t_given_A <- 0.1 # probab of twins at any time
+p_t_given_A <- 0.1 # likelyhood of twins per species
 p_t_given_B <- 0.2
 
+# prob of having seen twins at birth 1
 p_A_given_t1 <-  p_t_given_A * p_A / (p_A*p_t_given_A + p_B * p_t_given_B)
-p_A_new_prior <- p_A_given_t1
+p_A_new_prior <- p_A_given_t1 # new prior bc we have seen a birth, and hence the old prior p_A was updated
 
 
 p_B_given_t1 <-  p_t_given_B * p_B / (p_A*p_t_given_A + p_B * p_t_given_B)
 p_B_new_prior <- p_B_given_t1
 
-# probability of getting twins againg = likelyhood  of seeing twins given A  + seeing twins given B
-
-
+# probability of getting twins again at birth 2 
 p_t2_given_A <-  p_A_new_prior * p_t_given_A
 
 p_t2_given_B <- p_B_new_prior * p_t_given_B
 
 
-result <- p_t2_given_A + p_t2_given_B
+result <- p_t2_given_A + p_t2_given_B # the total prob of twins at birth 2, from both possible species combined
 
-
+result
 ```
 
 # 2H2.
@@ -290,11 +297,10 @@ p_A_given_t1
 ```
 
 # 2H3.
-
 Continuing on from the previous problem, suppose the same panda mother has a second birth and that it is not twins, but a singleton infant. Compute the posterior probability that this panda is species A.
 
 ```{r 2H3}
-p_A_new_prior
+p_A_new_prior # knowledge from the first birth
 p_B_new_prior
 
 
@@ -302,28 +308,35 @@ p_t_given_A <- 0.1 # probab of twins at any time
 p_t_given_B <- 0.2
 
 
-p_nt_given_A <- 1 - p_t_given_A
+p_nt_given_A <- 1 - p_t_given_A # probab of having a not-twin
 p_nt_given_B <- 1 - p_t_given_B
 
 
 p_A_given_nt2 <- (p_nt_given_A * p_A_new_prior) / (p_nt_given_A * p_A_new_prior + p_nt_given_B * p_B_new_prior)
+
 p_A_newest_prior <- p_A_given_nt2
 
-p_B_given_nt2 <- (p_nt_given_B * p_B_new_prior) / (p_nt_given_A * p_A_new_prior + p_nt_given_B * p_B_new_prior)
+
+# for the sake of completeness
+p_B_given_nt2 <- (p_nt_given_B * p_B_new_prior) / (p_nt_given_A * p_A_new_prior + p_nt_given_B * p_B_new_prior)#
+
 p_B_newest_prior <- p_B_given_nt2
+
 ```
 
 # 2H4.
 
 A common boast of Bayesian statisticians is that Bayesian inference makes it easy to use all of the data, even if the data are of different types. So suppose now that a veterinarian comes along who has a new genetic test that she claims can identify the species of our mother panda. But the test, like all tests, is imperfect. This is the information you have about the test:
 
-• The probability it correctly identifies a species A panda is 0.8. • The probability it correctly identifies a species B panda is 0.65.
+• The probability it correctly identifies a species A panda is 0.8.  
+• The probability it correctly identifies a species B panda is 0.65.
 
 The vet administers the test to your panda and tells you that the test is positive for species A. First ignore your previous information from the births and compute the posterior probability that your panda is species A. Then redo your calculation, now using the birth data as well.
 
-p(testA\|A) = 0.8 p(testB\|B) = 0.65
+p(testA\|A) = 0.8  
+p(testB\|B) = 0.65
 
-```{r 2H4}
+```{r 2H4a}
 # without the info from the births: 
 p_A <- 0.5
 p_B <- 0.5
@@ -331,19 +344,24 @@ p_B <- 0.5
 p_testA_given_A <- 0.8
 p_testB_given_B <- 0.65
 
-p_A_given_testA <- (p_testA_given_A * p_A ) / (p_testA_given_A * p_A  + # correct test result
-                                                 (1 - p_testB_given_B) * p_B) # false positive for A
+p_A_given_testA <- (p_testA_given_A * p_A ) / 
+                   (p_testA_given_A * p_A  + # correct test result
+                      (1 - p_testB_given_B) * p_B) # false positive for A
+p_A_given_testA
+```
 
 
+```{r 2H4b}
 # now with the birth knowledge
-
-p_A_newest_prior
-p_B_newest_prior
-
-
-p_A_given_testA_2 <- (p_testA_given_A * p_A_newest_prior ) / (p_testA_given_A * p_A_newest_prior  + # correct test result
-                                                 (1-p_testB_given_B) * p_B_newest_prior) # false positive for A
+# we can use the final state of knowledge after 2 births from 2H3: 
+# p_A_newest_prior
+# p_B_newest_prior
 
 
+p_A_given_testA_2 <- (p_testA_given_A * p_A_newest_prior ) / 
+                     (p_testA_given_A * p_A_newest_prior  + # correct test result
+                        (1-p_testB_given_B) * p_B_newest_prior) # false positive for A
+
+p_A_given_testA_2
 
 ```

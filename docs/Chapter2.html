@@ -214,6 +214,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#m5." id="toc-m5." class="nav-link" data-scroll-target="#m5.">2M5.</a></li>
   <li><a href="#m6." id="toc-m6." class="nav-link" data-scroll-target="#m6.">2M6.</a></li>
   <li><a href="#m7." id="toc-m7." class="nav-link" data-scroll-target="#m7.">2M7.</a></li>
+  <li><a href="#h1." id="toc-h1." class="nav-link" data-scroll-target="#h1.">2H1.</a></li>
   <li><a href="#h2." id="toc-h2." class="nav-link" data-scroll-target="#h2.">2H2.</a></li>
   <li><a href="#h3." id="toc-h3." class="nav-link" data-scroll-target="#h3.">2H3.</a></li>
   <li><a href="#h4." id="toc-h4." class="nav-link" data-scroll-target="#h4.">2H4.</a></li>
@@ -458,47 +459,81 @@ counting probabilities
 <section id="m7." class="level1">
 <h1>2M7.</h1>
 <p>Assume again the original card problem, with a single card showing a black side face up. Before looking at the other side, we draw another card from the bag and lay it face up on the table. The face that is shown on the new card is white. Show that the probability that the first card, the one showing a black side, has black on its other side is now 0.75. Use the counting method, if you can. Hint: Treat this like the sequence of globe tosses, counting all the ways to see each observation, for each possible first card.</p>
-<p>Round 1: black</p>
-<p>Round 2: white</p>
-<p>Total ww =&gt; 2 ww =&gt; 0 bw =&gt; 1 0 bb =&gt; 0</p>
-<pre><code>                        ww =&gt; 2</code></pre>
-<p>bw =&gt; 1 bw =&gt; 0 2 bb =&gt; 0</p>
-<pre><code>                        ww =&gt; 2</code></pre>
-<p>bb =&gt; 2 bw =&gt; 1 4 + 2 = 6 bb =&gt; 0</p>
+<p>ww bw bb</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+counting probabilities
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Round 1: ??<br>
+Round 2: white</p>
+<p>to be found: p(Round 1 = black)</p>
+<p><em>different ways the data could come about:</em></p>
+<ul>
+<li>if Round 1 = bw
+<ul>
+<li>Round 2 = ww (side 1 &amp; 2) =&gt; 1*2</li>
+</ul></li>
+<li>if Round 1 = bb (side 1 &amp; 2)
+<ul>
+<li>Round 2 = bw</li>
+<li>Round 2 = ww (side 1 &amp; 2) =&gt; 2*3</li>
+</ul>
+=&gt; total ways of the data = 8 =&gt; out of these 8, 6 come from a Round 1 == bb card =&gt;</li>
+</ul>
 <p>p(round1 = bb) =&gt; 6/8 = 0.75</p>
-<p>2H1. Suppose there are two species of panda bear. Both are equally common in the wild and live in the same places. They look exactly alike and eat the same food, and there is yet no genetic assay capable of telling them apart. They differ however in their family sizes. Species A gives birth to twins 10% of the time, otherwise birthing a single infant. Species B births twins 20% of the time, otherwise birthing singleton infants. Assume these numbers are known with certainty, from many years of field research. Now suppose you are managing a captive panda breeding program. You have a new female panda of unknown species, and she has just given birth to twins. What is the probability that her next birth will also be twins?</p>
-<p>p(t|A) = 0.1 p(t|B) = 0.2 p(A) = p(B) = 0.5</p>
+</div>
+</div>
+</div>
+</section>
+<section id="h1." class="level1">
+<h1>2H1.</h1>
+<p>Suppose there are two species of panda bear. Both are equally common in the wild and live in the same places. They look exactly alike and eat the same food, and there is yet no genetic assay capable of telling them apart. They differ however in their family sizes. Species A gives birth to twins 10% of the time, otherwise birthing a single infant. Species B births twins 20% of the time, otherwise birthing singleton infants. Assume these numbers are known with certainty, from many years of field research. Now suppose you are managing a captive panda breeding program. You have a new female panda of unknown species, and she has just given birth to twins. What is the probability that her next birth will also be twins?</p>
+<p>p(t|A) = 0.1<br>
+p(t|B) = 0.2<br>
+p(A) = p(B) = 0.5</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get the posterior for the first twins</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>p_A <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>p_B <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>p_t_given_A <span class="ot">&lt;-</span> <span class="fl">0.1</span> <span class="co"># probab of twins at any time</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>p_t_given_B <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>p_A_given_t1 <span class="ot">&lt;-</span>  p_t_given_A <span class="sc">*</span> p_A <span class="sc">/</span> (p_A<span class="sc">*</span>p_t_given_A <span class="sc">+</span> p_B <span class="sc">*</span> p_t_given_B)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>p_A_new_prior <span class="ot">&lt;-</span> p_A_given_t1</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>p_B_given_t1 <span class="ot">&lt;-</span>  p_t_given_B <span class="sc">*</span> p_B <span class="sc">/</span> (p_A<span class="sc">*</span>p_t_given_A <span class="sc">+</span> p_B <span class="sc">*</span> p_t_given_B)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>p_B_new_prior <span class="ot">&lt;-</span> p_B_given_t1</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># probability of getting twins againg = likelyhood  of seeing twins given A  + seeing twins given B</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>p_t2_given_A <span class="ot">&lt;-</span>  p_A_new_prior <span class="sc">*</span> p_t_given_A</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>p_t2_given_B <span class="ot">&lt;-</span> p_B_new_prior <span class="sc">*</span> p_t_given_B</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> p_t2_given_A <span class="sc">+</span> p_t2_given_B</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># probability of the panda species</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>p_A <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>p_B <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>p_t_given_A <span class="ot">&lt;-</span> <span class="fl">0.1</span> <span class="co"># likelyhood of twins per species</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>p_t_given_B <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># prob of having seen twins at birth 1</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>p_A_given_t1 <span class="ot">&lt;-</span>  p_t_given_A <span class="sc">*</span> p_A <span class="sc">/</span> (p_A<span class="sc">*</span>p_t_given_A <span class="sc">+</span> p_B <span class="sc">*</span> p_t_given_B)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>p_A_new_prior <span class="ot">&lt;-</span> p_A_given_t1 <span class="co"># new prior bc we have seen a birth, and hence the old prior p_A was updated</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>p_B_given_t1 <span class="ot">&lt;-</span>  p_t_given_B <span class="sc">*</span> p_B <span class="sc">/</span> (p_A<span class="sc">*</span>p_t_given_A <span class="sc">+</span> p_B <span class="sc">*</span> p_t_given_B)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>p_B_new_prior <span class="ot">&lt;-</span> p_B_given_t1</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co"># probability of getting twins again at birth 2 </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>p_t2_given_A <span class="ot">&lt;-</span>  p_A_new_prior <span class="sc">*</span> p_t_given_A</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>p_t2_given_B <span class="ot">&lt;-</span> p_B_new_prior <span class="sc">*</span> p_t_given_B</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> p_t2_given_A <span class="sc">+</span> p_t2_given_B <span class="co"># the total prob of twins at birth 2, from both possible species combined</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1666667</code></pre>
+</div>
 </div>
 </section>
 <section id="h2." class="level1">
 <h1>2H2.</h1>
 <p>Recall all the facts from the problem above. Now compute the probability that the panda we have is from species A, assuming we have observed only the first birth and that it was twins.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p_A_given_t1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>p_A_given_t1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.3333333</code></pre>
 </div>
@@ -508,59 +543,72 @@ counting probabilities
 <h1>2H3.</h1>
 <p>Continuing on from the previous problem, suppose the same panda mother has a second birth and that it is not twins, but a singleton infant. Compute the posterior probability that this panda is species A.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p_A_new_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>p_A_new_prior <span class="co"># knowledge from the first birth</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.3333333</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>p_B_new_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p_B_new_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6666667</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>p_t_given_A <span class="ot">&lt;-</span> <span class="fl">0.1</span> <span class="co"># probab of twins at any time</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>p_t_given_B <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p_nt_given_A <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> p_t_given_A</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>p_nt_given_B <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> p_t_given_B</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>p_A_given_nt2 <span class="ot">&lt;-</span> (p_nt_given_A <span class="sc">*</span> p_A_new_prior) <span class="sc">/</span> (p_nt_given_A <span class="sc">*</span> p_A_new_prior <span class="sc">+</span> p_nt_given_B <span class="sc">*</span> p_B_new_prior)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>p_A_newest_prior <span class="ot">&lt;-</span> p_A_given_nt2</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>p_B_given_nt2 <span class="ot">&lt;-</span> (p_nt_given_B <span class="sc">*</span> p_B_new_prior) <span class="sc">/</span> (p_nt_given_A <span class="sc">*</span> p_A_new_prior <span class="sc">+</span> p_nt_given_B <span class="sc">*</span> p_B_new_prior)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>p_B_newest_prior <span class="ot">&lt;-</span> p_B_given_nt2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p_t_given_A <span class="ot">&lt;-</span> <span class="fl">0.1</span> <span class="co"># probab of twins at any time</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>p_t_given_B <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>p_nt_given_A <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> p_t_given_A <span class="co"># probab of having a not-twin</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>p_nt_given_B <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> p_t_given_B</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>p_A_given_nt2 <span class="ot">&lt;-</span> (p_nt_given_A <span class="sc">*</span> p_A_new_prior) <span class="sc">/</span> (p_nt_given_A <span class="sc">*</span> p_A_new_prior <span class="sc">+</span> p_nt_given_B <span class="sc">*</span> p_B_new_prior)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>p_A_newest_prior <span class="ot">&lt;-</span> p_A_given_nt2</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># for the sake of completeness</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>p_B_given_nt2 <span class="ot">&lt;-</span> (p_nt_given_B <span class="sc">*</span> p_B_new_prior) <span class="sc">/</span> (p_nt_given_A <span class="sc">*</span> p_A_new_prior <span class="sc">+</span> p_nt_given_B <span class="sc">*</span> p_B_new_prior)<span class="co">#</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>p_B_newest_prior <span class="ot">&lt;-</span> p_B_given_nt2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="h4." class="level1">
 <h1>2H4.</h1>
 <p>A common boast of Bayesian statisticians is that Bayesian inference makes it easy to use all of the data, even if the data are of different types. So suppose now that a veterinarian comes along who has a new genetic test that she claims can identify the species of our mother panda. But the test, like all tests, is imperfect. This is the information you have about the test:</p>
-<p>• The probability it correctly identifies a species A panda is 0.8. • The probability it correctly identifies a species B panda is 0.65.</p>
+<p>• The probability it correctly identifies a species A panda is 0.8.<br>
+• The probability it correctly identifies a species B panda is 0.65.</p>
 <p>The vet administers the test to your panda and tells you that the test is positive for species A. First ignore your previous information from the births and compute the posterior probability that your panda is species A. Then redo your calculation, now using the birth data as well.</p>
-<p>p(testA|A) = 0.8 p(testB|B) = 0.65</p>
+<p>p(testA|A) = 0.8<br>
+p(testB|B) = 0.65</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># without the info from the births: </span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>p_A <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>p_B <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>p_testA_given_A <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>p_testB_given_B <span class="ot">&lt;-</span> <span class="fl">0.65</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>p_A_given_testA <span class="ot">&lt;-</span> (p_testA_given_A <span class="sc">*</span> p_A ) <span class="sc">/</span> (p_testA_given_A <span class="sc">*</span> p_A  <span class="sc">+</span> <span class="co"># correct test result</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                                                 (<span class="dv">1</span> <span class="sc">-</span> p_testB_given_B) <span class="sc">*</span> p_B) <span class="co"># false positive for A</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># now with the birth knowledge</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>p_A_newest_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># without the info from the births: </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>p_A <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>p_B <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p_testA_given_A <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>p_testB_given_B <span class="ot">&lt;-</span> <span class="fl">0.65</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>p_A_given_testA <span class="ot">&lt;-</span> (p_testA_given_A <span class="sc">*</span> p_A ) <span class="sc">/</span> </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                   (p_testA_given_A <span class="sc">*</span> p_A  <span class="sc">+</span> <span class="co"># correct test result</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                      (<span class="dv">1</span> <span class="sc">-</span> p_testB_given_B) <span class="sc">*</span> p_B) <span class="co"># false positive for A</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>p_A_given_testA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.36</code></pre>
+<pre><code>[1] 0.6956522</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>p_B_newest_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># now with the birth knowledge</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># we can use the final state of knowledge after 2 births from 2H3: </span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># p_A_newest_prior</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># p_B_newest_prior</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>p_A_given_testA_2 <span class="ot">&lt;-</span> (p_testA_given_A <span class="sc">*</span> p_A_newest_prior ) <span class="sc">/</span> </span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>                     (p_testA_given_A <span class="sc">*</span> p_A_newest_prior  <span class="sc">+</span> <span class="co"># correct test result</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">1</span><span class="sc">-</span>p_testB_given_B) <span class="sc">*</span> p_B_newest_prior) <span class="co"># false positive for A</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>p_A_given_testA_2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.64</code></pre>
+<pre><code>[1] 0.5625</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>p_A_given_testA_2 <span class="ot">&lt;-</span> (p_testA_given_A <span class="sc">*</span> p_A_newest_prior ) <span class="sc">/</span> (p_testA_given_A <span class="sc">*</span> p_A_newest_prior  <span class="sc">+</span> <span class="co"># correct test result</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                                                 (<span class="dv">1</span><span class="sc">-</span>p_testB_given_B) <span class="sc">*</span> p_B_newest_prior) <span class="co"># false positive for A</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
