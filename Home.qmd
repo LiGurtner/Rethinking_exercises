@@ -4,7 +4,6 @@ title: "Rethinking Stastistics - exercises"
 
 Date: **December 2024**
 
-
 ------------------------------------------------------------------------
 
 This website documents the efforts to do the exercises of Richard McElreath's "Rethinking statistics", *ed.2*. We build on the following efforts: 
@@ -15,8 +14,14 @@ There is a [lecture-series](https://www.youtube.com/watch?v=cclUd_HoRlo&list=PLD
 
 To the date of this writing, there are solutions to the excersises online, but only [using the original rethinking package](https://sr2-solutions.wjakethompson.com/bayesian-inference#chapter-2). In an effort to self-teach ourselves, we read the textbook and go through the exercises together. On this website, we collect our efforts. 
 
-The website was built using the [qrtAcademic template](https://andreaczhang.github.io/qtwAcademic/). 
+The website was built using the [qrtAcademic template](https://andreaczhang.github.io/qtwAcademic/).
+
+# Who are we?
+
+A group of post-docs and phd-students at the Centre for Development and Environment at the University of Bern. 
+
 # Disclaimer
+
 We do our best but will make mistakes along the way. If you find them, congratulations! Also, please tell us, so we can fix them. 
 
 # Licence
