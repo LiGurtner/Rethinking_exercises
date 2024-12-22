@@ -1,69 +1,25 @@
 ---
-title: "Title of Your Workshop Session"
+title: "Rethinking Stastistics - exercises"
 ---
 
-Date: **Date and time**
+Date: **December 2024**
 
-Room: **Location**
-
-Instructors: Instructor A, B, C
 
 ------------------------------------------------------------------------
 
-::: callout-note
-## This workshop template
+This website documents the efforts to do the exercises of Richard McElreath's "Rethinking statistics", *ed.2*. We build on the following efforts: 
 
-This workshop template contains 4 pages:
+We read: [Rethinking Statistics, second edition](https://xcelab.net/rm/). The book has been "translated" into using [brms](https://github.com/paul-buerkner/brms) and the [tidyverse](https://www.tidyverse.org/) by [Solomon Kurz](https://bookdown.org/content/4857/), and we rely on his code. 
 
--   Home: `index.qmd` (this page)
+There is a [lecture-series](https://www.youtube.com/watch?v=cclUd_HoRlo&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=2) to go along with the book. 
 
--   About: `about.qmd`
+To the date of this writing, there are solutions to the excersises online, but only [using the original rethinking package](https://sr2-solutions.wjakethompson.com/bayesian-inference#chapter-2). In an effort to self-teach ourselves, we read the textbook and go through the exercises together. On this website, we collect our efforts. 
 
-Two content pages
+The website was built using the [qrtAcademic template](https://andreaczhang.github.io/qtwAcademic/). 
+# Disclaimer
+We do our best but will make mistakes along the way. If you find them, congratulations! Also, please tell us, so we can fix them. 
 
--   Page without code: `part_1_prep.qmd`
+# Licence
 
--   Page with R code: `part_2_eda.qmd`
+CC-BC 4.0
 
-It is straightforward to add more content pages: you need to create a new `.qmd` file (or copy/paste the existing ones), then link the new page inside `_quarto.yml`.
-:::
-
-::: callout-tip
-## Homepage of your workshop
-
-This is the **homepage** `index.qmd` for your workshop, so ideally it should contain some key information such as **time and place, instructors** and information of the course/workshop.
-
-It should be easy to navigate.
-:::
-
-# Welcome!
-
--   The goal of the workshop is to ... (*insert your message*)
--   For example, introduce kep concepts in machine learning, such as regularisation.
--   Workshop material can be found in the workshop [github repository](https://github.com).
-
-#### Learning Objectives
-
-At the end of the tutorial, participants will be able to
-
--   understand key concepts for ... (*insert your message*)
--   For example, training machine learning models such as regularisation.
--   another objective
-
-#### Pre-requisites
-
--   Basic familiarity with R
--   Some other knowledge
-
-# Schedule
-
-::: callout-tip
-## Tabular schedule
-
-It can be useful to include a tabular schedule with links.
-:::
-
-|     Time      |                       Topic                       |    Presenter    |
-|:---------------:|:------------------------------------:|:---------------:|
-| 9:00 - 10:30  |     [Session 1: Preparation](part_1_prep.qmd)     |  Instructor A   |
-| 10:45 - 12:00 | [Session 2: Exploratory Analysis](part_2_eda.qmd) | Instructor B, C |

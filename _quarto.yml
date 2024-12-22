@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "Workshop Title"
+  title: "Rethinking statistics - exercises"
   navbar:
     left:
       - href: Home.qmd
