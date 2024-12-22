@@ -226,7 +226,14 @@ coming from the B/B card = 2/4 = 0.5
 
 Assume again the original card problem, with a single card showing a black side face up. Before looking at the other side, we draw another card from the bag and lay it face up on the table. The face that is shown on the new card is white. Show that the probability that the first card, the one showing a black side, has black on its other side is now 0.75. Use the counting method, if you can. Hint: Treat this like the sequence of globe tosses, counting all the ways to see each observation, for each possible first card.
 
-Round 1: black Round 2: white Total ww =\> 2 ww =\> 0 bw =\> 1 0 bb =\> 0
+Round 1: black 
+
+Round 2: white 
+
+Total ww =\> 2
+      ww =\> 0 
+      bw =\> 1 0 
+      bb =\> 0
 
 ```         
                         ww => 2
