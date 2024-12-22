@@ -35,11 +35,11 @@ The Easy problems use the samples from the posterior distribution for the globe 
 
 
 ```{r data4easy}
-# p_grid is a sequence of all possible values from percentage of water on planet
+# hypothezised_p_of_water is a sequence of all possible values from percentage of water on planet
 n_water = 6
 n_tosses = 9
 
-d <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out = 1000),
+d_e <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out = 1000),
            prior  = 1) |> # define prior
     mutate(likelihood = dbinom(n_water, size = n_tosses, prob = hypothezised_p_of_water)) |>  # compute likelihood at each value in grid
     mutate(unstd_posterior = likelihood * prior) |> # compute product of likelihood and prior
@@ -49,14 +49,14 @@ d <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out = 1000),
 n_samples <- 10000
 set.seed(100)
 
-samples <- d |> 
-  sample_n(size = n_samples, weight = posterior, replace = T) # sampling entire lines from d
+samples_e <- d_e |> 
+  sample_n(size = n_samples, weight = posterior, replace = T) # sampling entire lines from d_e. the "posterior" argument gives every line in d_e the probability of being chosen for the samples tibble
 
 
 
-d |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line()
+d_e |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line()
 
-samples |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line()
+samples_e |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line() # samples for the easy questions
 
 ```
 
@@ -66,7 +66,7 @@ The two distributions look similar. However, as `n_samples` becomes small, the s
 # 3E1. 
 How much posterior probability lies below p = 0.2? 
 ```{r}
-samples |> 
+samples_e |> 
   filter(hypothezised_p_of_water < 0.2) |>  # all the p's < 0.2
   summarise(perc_p = n()/n_samples) # get percentage of all p's < 0.2
 ```
@@ -76,7 +76,7 @@ samples |>
 How much posterior probability lies above p = 0.8? 
 
 ```{r}
-samples |> 
+samples_e |> 
   filter(hypothezised_p_of_water > 0.8) |>  
   summarise(perc_p = n()/n_samples)
 
@@ -86,12 +86,12 @@ samples |>
 How much posterior probability lies between p = 0.2 and p = 0.8? 
 ```{r}
 
-samples |> 
+samples_e |> 
   filter(hypothezised_p_of_water < 0.8 & hypothezised_p_of_water > 0.2) |> 
   summarise(perc_p = n()/n_samples)
 
 # or:
-samples |> 
+samples_e |> 
   filter(between(hypothezised_p_of_water, 0.2, 0.8)) |> 
   summarise(perc_p = n()/n_samples)
 
@@ -101,7 +101,7 @@ samples |>
 # 3E4. 
 20% of the posterior probability lies below which value of p? 
 ```{r}
-quantile(samples$hypothezised_p_of_water, probs = 0.2)
+quantile(samples_e$hypothezised_p_of_water, probs = 0.2)
 ```
 
 
@@ -109,7 +109,7 @@ quantile(samples$hypothezised_p_of_water, probs = 0.2)
 20% of the posterior probability lies above which value of p? 
 ```{r}
 
-quantile(samples$hypothezised_p_of_water, probs = 0.8)
+quantile(samples_e$hypothezised_p_of_water, probs = 0.8)
 ```
 
 
@@ -117,7 +117,7 @@ quantile(samples$hypothezised_p_of_water, probs = 0.8)
 Which values of p contain the narrowest interval equal to 66% of the posterior probability? 
 
 ```{r}
-mode_hdi(samples$hypothezised_p_of_water, .width = 0.66)
+mode_hdi(samples_e$hypothezised_p_of_water, .width = 0.66)
 ```
 
 
@@ -126,156 +126,180 @@ Which values of p contain 66% of the posterior probability, assuming equal poste
 
 ```{r}
 # 33% of the posterior must be outside, 17.5% on each side of the distribution
-quantile(samples$hypothezised_p_of_water, probs = c(0.175, .825))
+quantile(samples_e$hypothezised_p_of_water, probs = c(0.175, .825))
 ```
 
 
+# 3M1.
+Suppose the globe tossing data had turned out to be 8 water in 15 tosses. Construct the posterior distribution, using grid approximation. Use the same flat prior as before. 
 
 ```{r}
-
-# p_grid is a sequence of all possible values from percentage of water on planet
+# hypothezised_p_of_water is a sequence of all possible values from percentage of water on planet
 n_water = 8
 n_tosses = 15
 
-d <- 
-    tibble(p_grid = seq(from = 0, to = 1, length.out = 1000),
-           prior  = 1) %>%                                       # define prior
-    mutate(likelihood = dbinom(n_water, size = n_tosses, prob = p_grid)) %>%  # compute likelihood at each value in grid
-    mutate(unstd_posterior = likelihood * prior) %>%             # compute product of likelihood and prior
+d_m <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out = 1000),
+           prior  = 1) |> # define prior
+    mutate(likelihood = dbinom(n_water, size = n_tosses, prob = hypothezised_p_of_water)) |>  # compute likelihood at each value in grid
+    mutate(unstd_posterior = likelihood * prior) |> # compute product of likelihood and prior
     mutate(posterior = unstd_posterior / sum(unstd_posterior))   # standardize the posterior, so it sums to 1
 
+d_m |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line()
+```
 
 
-d |> ggplot(aes(x = p_grid, y = posterior)) + geom_line()
+# 3M2. 
+Draw 10,000 samples from the grid approximation from above. Then use the samples to calculate the 90% HPDI for p. 
+
+```{r}
 n_samples <- 10000
-set.seed(3)
+set.seed(100)
 
-samples <- d %>% 
+samples_m <- d_m %>% 
   sample_n(size = n_samples, weight = posterior, replace = T)
 
 
+mode_hdi(samples_m$hypothezised_p_of_water, .probs = c(0.05, 0.95))
 
-n_dummy_water <- rbinom(5000, size = n_tosses, prob = 0.7)
-
-n_draws <- 1e5
-
-simulate_binom <- function(n, probability) {
-  set.seed(3)
-  rbinom(n_draws, size = n, prob = probability) 
-}
-
-d <-
-  crossing(n_tosses          = c(3, 6, 100),
-           probability = c(.3, .6, .9)) %>% 
-  mutate(draws = map2(n_tosses, probability, simulate_binom)) %>% 
-  ungroup() %>% 
-  mutate(n_tosses           = str_c("n tosses = ", n_tosses),
-         probability = str_c("p = ", probability)) %>% 
-  unnest(draws)
-
-
-
-
-d %>% 
-  ggplot(aes(x = draws)) +
-  geom_histogram(binwidth = 1, center = 0,
-                 color = "grey92", linewidth = 1/10) +
-  scale_x_continuous("dummy water count",
-                     breaks = seq(from = 0, to = 100, by = 2)) +
-  ylab("frequency") +
-  coord_cartesian(xlim = c(0, 100)) +
-  theme(panel.grid = element_blank()) +
-  facet_grid(n_tosses ~ probability)
-
-
-w <- rbinom(1e4, size = 9, prob = samples$p_grid)
-mean(w == 6)
+samples_m |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line()
 
 ```
 
+# 3M3. 
+Construct a posterior predictive check for this model and data. This means simulate the distribution of samples, averaging over the posterior uncertainty in p. What is the probability of observing 8 water in 15 tosses?
+
+=> here, we use code from Solomon Kurz' translation of the textbook, [section 3.3.2](https://bookdown.org/content/4857/sampling-the-imaginary.html#sampling-to-simulate-prediction)
+
+```{r}
+n_dummy_water <- tibble(n_waters = rbinom(n_samples, # same size in samples_m
+                                          size = n_tosses, # 15
+                                          prob = samples_m$hypothezised_p_of_water)) # create 10000 simulated observed water in n_tosses, with the actual percentage of water coming from the p's sampled proportionally from the posterior 
+
+
+# how many of the dummy-data results show 8 waters in 15 tosses?
+mean(n_dummy_water$n_waters == 8)
+
+
+n_dummy_water %>% 
+  ggplot(aes(x = n_waters)) +
+  geom_histogram(binwidth = 1, center = 0,
+                 color = "grey92") +
+  scale_x_continuous("dummy water count") +
+  ylab("frequency") 
+
+```
+
+# 3M4. 
+Using the posterior distribution constructed from the new (8/15) data, now calculate the probability of observing 6 water in 9 tosses.
+
+
+```{r}
+n_dummy_water <- tibble(n_waters = rbinom(n_samples, # same size in samples_m
+                                          size = 9, # 15
+                                          prob = samples_m$hypothezised_p_of_water)) # create 10000 simulated observed water in n_tosses, with the actual percentage of water coming from the p's sampled proportionally from the posterior 
+
+
+# how many of the dummy-data results show 6 waters in 9 tosses, but taking the posterior from the 8/15 data?
+mean(n_dummy_water$n_waters == 6)
+
+
+n_dummy_water %>% 
+  ggplot(aes(x = n_waters)) +
+  geom_histogram(binwidth = 1, center = 0,
+                 color = "grey92") +
+  scale_x_continuous("dummy water count") +
+  ylab("frequency") 
+```
+
 # 3M5
+Start over at 3M1, but now use a prior that is zero below p = 0.5 and a constant above p = 0.5. This corresponds to prior information that a majority of the Earth’s surface is water. Repeat each problem above and compare the inferences (using both priors) to the true value p = 0.7.
 
 ```{r 3m5}
 n_water = 8
 n_tosses = 15
 
-d <- tibble(p_grid = seq(from = 0, to = 1, length.out = 1000),
-           prior  = case_when(p_grid < 0.5 ~ 0, 
-                              p_grid >= 0.5 ~ 0.1)) %>%                                       # define prior
-    mutate(likelihood = dbinom(n_water, size = n_tosses, prob = p_grid)) %>%  # compute likelihood at each value in grid
+d_m2 <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out = 1000),
+           prior  = case_when(hypothezised_p_of_water < 0.5 ~ 0, 
+                              hypothezised_p_of_water >= 0.5 ~ 0.1)) %>%                                       # define prior
+    mutate(likelihood = dbinom(n_water, size = n_tosses, prob = hypothezised_p_of_water)) %>%  # compute likelihood at each value in grid
     mutate(unstd_posterior = likelihood * prior) %>%             # compute product of likelihood and prior
     mutate(posterior = unstd_posterior / sum(unstd_posterior))   # standardize the posterior, so it sums to 1
 
 
 
-d |> ggplot(aes(x = p_grid, y = posterior)) + geom_line()
+d_m2 |> ggplot(aes(x = p_ghypothezised_p_of_waterrid, y = posterior)) + geom_line()
 n_samples <- 10000
 set.seed(3)
 
-samples <- d %>% 
+samples_m2 <- d_m2 %>% 
   sample_n(size = n_samples, weight = posterior, replace = T)
 
-# 1: post-prob < 0.2
-mean(samples$p_grid < 0.2)
+# re-doing also the easy ones, for the sake of completeness
+#: post-prob < 0.2
+mean(samples_m2$hypothezised_p_of_water < 0.2)
 
+mean(samples_m2$hypothezised_p_of_water > 0.8)
 
-mean(samples$p_grid > 0.8)
+mean(between(samples_m2$hypothezised_p_of_water, left = 0.2, right = 0.8))
 
-mean(between(samples$p_grid, left = 0.2, right = 0.8))
+quantile(samples_m2$hypothezised_p_of_water, probs = 0.2)
+mode_hdi(samples_m2$hypothezised_p_of_water, .width = .66)
 
-quantile(samples$p_grid, probs = 0.2)
-mode_hdi(samples$p_grid, .width = .66)
-
-quantile(samples$p_grid, probs = c(0.175, 0.825))
+quantile(samples_m2$hypothezised_p_of_water, probs = c(0.175, 0.825))
 
 # Draw 10,000 samples from the grid approximation from above. Then use the sample to calculate the 90% HPDI for p.
 
-mode_hdi(samples$p_grid, .width = 0.9)
+mode_hdi(samples_m2$hypothezised_p_of_water, .width = 0.9)
 
 # Construct a posterior predictive check for this model and data. The means simulate the distribution of samples, averaging over the posterior uncertainty in p. What is the probability of observing 8 water in 15 tosses?
 
-dummy_tosses <- rbinom(1000, 15, prob = samples$p_grid)
+dummy_tosses <- rbinom(1000, 15, prob = samples_m2$hypothezised_p_of_water)
 
 mean(dummy_tosses == 8)
 
 
 # Using the posterior distribution constructed from the new (8/15) data, now calculate the probability of observing 6 water in 9 tosses.
 
-dummy_tosses <- rbinom(1000, 9, prob = samples$p_grid)
+dummy_tosses <- rbinom(1000, 9, prob = samples_m2$hypothezised_p_of_water)
 
 mean(dummy_tosses == 6)
 
 
-d |>  ggplot(aes(x = p_grid, y= posterior))  + geom_line()
-hist(samples$p_grid)
+d_m2 |>  ggplot(aes(x = hypothezised_p_of_water, y= posterior))  + geom_line()
+hist(samples_m2$hypothezised_p_of_water)
 
 ```
 
-#3M6. Suppose you want to estimate the Earth's proportion of water very precisely. Specifically, you want the 99% percentile interval of the posterior distribution of p to be only 0.05 wide. This means the distance between the upper and lower bound of the interval should be 0.05. How many times will you have to toss the globe to do this?
+#3M6. 
+
+Suppose you want to estimate the Earth's proportion of water very precisely. Specifically, you want the 99% percentile interval of the posterior distribution of p to be only 0.05 wide. This means the distance between the upper and lower bound of the interval should be 0.05. How many times will you have to toss the globe to do this?
 
 ```{r}
-
+# strategy: trying out until the mode_hdi is as small as required
 #generating the "real" data
-n_tosses <- 2201
-n_water <- rbinom(1, n_tosses, prob = 0.7) # real observed n_waters
+n_tosses <- 2201 # play around with this number
+n_water <- rbinom(1, n_tosses, prob = 0.7) # fake observations of earth
 
 # getting posterior => best guess of proportion
-d <- tibble(p_grid = seq(from = 0, to = 1, length.out =1000), 
+d_m3 <- tibble(hypothezised_p_of_water = seq(from = 0, to = 1, length.out =1000), 
             prior = 1, 
-            likelyhood = dbinom(n_water, n_tosses, prob = p_grid), 
+            likelyhood = dbinom(n_water, n_tosses, prob = hypothezised_p_of_water), 
             posterior = likelyhood*prior / (sum(likelyhood*prior)))
 
-# samling from the posterior to simulate redoing the experiment 10000 times
-samples <- sample(d$p_grid,size = 10000, prob = d$posterior, replace = T )
+# sampling from the posterior to simulate redoing the experiment 10000 times
+samples_m3 <- sample(d_m3$hypothezised_p_of_water,size = 10000, prob = d_m3$posterior, replace = T )
 
 
 # what is the 99% hdi?
 a <- mode_hdi(samples, .width = 0.99)
-
 a$ymax - a$ymin
 ```
 
-# hard problems
+
+
+
+
+# 3H1.
 
 ```{r hard data}
 birth1 <- c(1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,1,1,0,0,0,1,0,0,0,1,0, 0,0,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1,0,1,0,0,1,1,0,1,0,0,0,0,0,0,0, 1,1,0,1,0,0,1,0,0,0,1,0,0,1,1,1,1,0,1,0,1,1,1,1,1,0,0,1,0,1,1,0, 1,0,1,1,1,0,1,1,1,1) 
@@ -286,7 +310,7 @@ all_births <- c(birth1, birth2)
 
 ```
 
-# 3H1.
+
 
 Using grid approximation, compute the posterior distribution for the probability of a birth being a boy. Assume a uniform prior probability. Which parameter value maximizes the posterior probability?
 
