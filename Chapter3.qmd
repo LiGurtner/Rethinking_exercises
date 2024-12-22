@@ -31,16 +31,10 @@ theme_set(theme_tidybayes())
 ```
 
 
+The Easy problems use the samples from the posterior distribution for the globe tossing example. This code will give you a specific set of samples, so that you can check your answers exactly. Use the values in samples to answer the questions that follow.
+
+
 ```{r data4easy}
-p_grid <- seq( from=0 , to=1 , length.out=1000 ) 
-prior <- rep( 1 , 1000 ) 
-likelihood <- dbinom( 6 , size=9 , prob=p_grid ) 
-posterior <- likelihood * prior 
-posterior <- posterior / sum(posterior)
-set.seed(100) 
-samples <- sample( p_grid , prob=posterior , size=1e4 , replace=TRUE )
-
-
 # p_grid is a sequence of all possible values from percentage of water on planet
 n_water = 6
 n_tosses = 9
@@ -67,8 +61,7 @@ samples |> ggplot(aes(x = hypothezised_p_of_water, y = posterior)) + geom_line()
 ```
 
 
-The Easy problems use the samples from the posterior distribution for the globe tossing example. This code will give you a specific set of samples, so that you can check your answers exactly. Use the values in samples to answer the questions that follow.
-
+The two distributions look similar. However, as `n_samples` becomes small, the shape of samples$posterior becomes less smooth.
 
 # 3E1. 
 How much posterior probability lies below p = 0.2? 
