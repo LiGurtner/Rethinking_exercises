@@ -5,37 +5,338 @@ format:
     code-fold: false
     code-tools: false
 editor: source
+editor_options: 
+  chunk_output_type: console
+author: Lilla Gurtner
 ---
 
-::: callout-tip
-## Page without code
+```{r setup, echo = F, message = F, error=F, include = F}
 
-This page contains an example for some structured preparation information for a workshop. No code is executed here.
+# knitr global options ----
+knitr::opts_chunk$set(fig.pos = 'H',
+                      echo = T,
+                      message = F,
+                      warning = F, 
+                      dpi = 600,
+                      fig.align = "center", 
+                      fig.asp = 0.62) # golden ratio
+
+library(tidyverse)
+library(tidybayes) # nice ploting
+library(brms)
+library(wesanderson)
+
+theme_set(theme_tidybayes())
+
+#wesanderson::wes_palette("AsteroidCity2") 
+
+
+
+```
+
+
+# 2E1. 
+
+Which of the expressions below correspond to the statement: the probability of rain on Monday? 
+
+(1) Pr(rain)  
+(2) Pr(rain|Monday) *
+(3) Pr(Monday|rain)  
+(4) Pr(rain, Monday)/ Pr(Monday) *
+
+
+# 2E2. 
+Which of the following statements corresponds to the expression: Pr(Monday|rain)? 
+
+(1) The probability of rain on Monday. 
+(2) The probability of rain, given that it is Monday. 
+(3) The probability that it is Monday, given that it is raining. *
+(4) The probability that it is Monday and that it is raining.
+
+
+# 2E3. 
+Which of the expressions below correspond to the statement: the probability that it is Monday, given that it is raining? 
+
+(1) Pr(Monday|rain) *
+(2) Pr(rain|Monday) 
+(3) Pr(rain|Monday) Pr(Monday) 
+(4) Pr(rain|Monday) Pr(Monday)/ Pr(rain) *
+(5) Pr(Monday|rain) Pr(rain)/ Pr(Monday)
+
+
+# 2E4. 
+The Bayesian statistician Bruno de Finetti (1906–1985) began his 1973 book on probability theory with the declaration: “PROBABILITY DOES NOT EXIST.” The capitals appeared in the original, so I imagine de Finetti wanted us to shout this statement. What he meant is that probability is a device for describing uncertainty from the perspective of an observer with limited knowledge; it has no objective reality. Discuss the globe tossing example from the chapter, in light of this statement. What does it mean to say “the probability of water is 0.7”?
+
+=> Given our knowledge / ignorance about the true state of water on the planet, we think that 70% of the planet are covered in water.
+
+# 2M1.
+
+Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for p.
+
+(1) W, W, W
+(2) W, W, W, L
+(3) L, W, W, L, W, W, W
+
+```{r 2M1, include = T}
+
+grit_length <- 30 # steps of hypothetical water coverage on planet
+n_water <- 3 # tossig result, adapt for (2) and (3)
+n_total <- 3 # n tosses , adapt for (2) and (3)
+
+# create data
+d <- tibble(hypothesized_true_p_of_water = seq(from = 0, to = 1, length = grit_length), 
+            prior = 1/grit_length) |> #this could also be 1 or any other constant 
+  mutate(likelyhood = dbinom(n_water, size = n_total, prob = hypothesized_true_p_of_water)) |>  # likelyhood of observing the "grid value" p given a prior at this location
+  mutate(unstand_posterior = likelyhood * prior, 
+         stand_posterior = unstand_posterior / sum(unstand_posterior)) |> 
+  pivot_longer(names_to = "variable", values_to = "probability", 2:5) # for plotting in the next step
+
+
+d |> ggplot(aes(x = hypothesized_true_p_of_water, y = probability, color = variable)) +
+  geom_point() + 
+  geom_line() + 
+  ggtitle(paste("probability of seeing", n_water, "waters in", n_total, "world tosses.", sep = " ")) +
+  scale_color_manual(values = wes_palette("Darjeeling2", n = 4, type = "discrete"))
+
+```
+
+# 2M2.
+
+Now assume a prior for p that is equal to zero when p \< 0.5 and is a positive constant when p ≥ 0.5. Again compute and plot the grid approximate posterior distribution for each of the sets of observations in the problem just above.
+
+(1) W, W, W
+(2) W, W, W, L
+(3) L, W, W, L, W, W, W
+
+```{r 2M2.}
+
+grit_length <- 20# steps of hypothetical water coverage on planet
+n_water <- 3 # adapt for (2) and (3)
+n_total <- 3# adapt for (2) and (3)
+sequence <- seq(from = 0, to = 1, length = grit_length)
+grit_bigger_than_0.5 <- sum(sequence >= 0.5) #this could also be 1 or any other constant 
+
+# create data
+d <- tibble(hypothesized_true_p_of_water = seq(from = 0, to = 1, length = grit_length), 
+            prior = case_when(hypothesized_true_p_of_water < 0.5 ~ 0, 
+                              hypothesized_true_p_of_water >= 0.5 ~ 1/grit_bigger_than_0.5)) |> 
+  mutate(likelyhood = dbinom(n_water, size = n_total, prob = hypothesized_true_p_of_water)) |>  # likelyhood of observing the grid value given a prior at this location
+  mutate(unstand_posterior = likelyhood * prior, 
+         stand_posterior = unstand_posterior / sum(unstand_posterior)) |> 
+  pivot_longer(names_to = "variable", values_to = "probability", 2:5) # for plotting
+
+
+d |> ggplot(aes(x = hypothesized_true_p_of_water, y = probability, color = variable)) +
+  geom_point() + 
+  geom_line() + 
+  ggtitle(paste("probability of seeing", n_water, "waters in", n_total, "world tosses.", sep = " "))  +
+  scale_color_manual(values = wes_palette("Darjeeling2", n = 4, type = "discrete"))
+```
+
+Note how the likelyhood does not care about the prior: it is > 0 even at proportions of water that we know are not possible according to prior knowledge.
+
+# 2M3.
+
+Suppose there are two globes, one for Earth and one for Mars. The Earth globe is 70% covered in water. The Mars globe is 100% land. Further suppose that one of these globes---you don't know which---was tossed in the air and produced a "land" observation. Assume that each globe was equally likely to be tossed. Show that the posterior probability that the globe was the Earth, conditional on seeing "land" (Pr(Earth\|land)), is 0.23.
+
+*information in the text:*
+
+If I toss earth, Pr(land) = 0.3 
+If I toss mars, Pr(land) = 1
+
+Pr(tossing_earth) = Pr(tossing_mars) = 0.5
+
+To be shown: 
+Pr(Earth\|land) = (Pr(land\|Earth) \* Pr(earth)) / Pr(earth and land) = 0.23 
+
+```{r 2M3.}
+p_e = 0.5
+p_m = 0.5
+
+p_l_given_e = 0.3
+p_l_given_m = 1
+
+p_e_given_l <- (p_l_given_e * p_e) / (p_e * p_l_given_e + p_m * p_l_given_m)
+
+p_e_given_l
+
+```
+
+# 2M4.
+
+Suppose you have a deck with only three cards. Each card has two sides, and each side is either black or white. One card has two black sides. The second card has one black and one white side. The third card has two white sides. Now suppose all three cards are placed in a bag and shuffled. Someone reaches into the bag and pulls out a card and places it flat on a table. A black side is shown facing up, but you don't know the color of the side facing down. Show that the probability that the other side is also black is 2/3. Use the counting method (Section 2 of the chapter 2) to approach this problem. This means counting up the ways that each card could produce the observed data (a black side facing up on the table).
+
+
+::: {.callout-note collapse="true"}
+## counting possibilities
+
+all-white card =\> 0
+
+b/w card =\> 1 
+
+all-black card =\> 2
+
+=\> total possibilities of getting the result = 3 
+
+=\> 2/3 of which are generated by the all-black card
+
 :::
 
-Here are some preparation information for the participants.
+# 2M5.
 
-## Software
+Now suppose there are four cards: B/B, B/W, W/W, and another B/B. Again suppose a card is drawn from the bag and a black side appears face up. Again calculate the probability that the other side is black.
 
-In this workshop we will be using R. You can either
+::: {.callout-note collapse="true"}
+## counting possibilities
 
--   have **R and Rstudio** installed on your laptop
--   or, use **Posit cloud** (formerly Rstudio Cloud).
+all-white card =\> 0
 
-[Posit cloud](https://posit.cloud) is free of charge for personal users, yet you need to [sign up](https://posit.cloud/plans/free) for a new user account and have internet connection.
+b/w card =\> 1 
 
-The R package we are using is `glmnet`.
+all-black card 1 =\> 2 
 
-## Data
+all-black card 2 =\> 2
 
-The datasets we use can be found here (*insert link*).
+total: 5 ways it can be black, 4/5 have a also black backside
 
-## Code
+:::
 
-The R scripts used in part 1 and part 2 can be found here (*insert link*).
+# 2M6.
 
-## Resources
+Imagine that black ink is heavy, and so cards with black sides are heavier than cards with white sides. As a result, it's less likely that a card with black sides is pulled from the bag. So again assume there are three cards: B/B, B/W, and W/W. After experimenting a number of times, you conclude that for every way to pull the B/B card from the bag, there are 2 ways to pull the B/W card and 3 ways to pull the W/W card. Again suppose that a card is pulled and a black side appears face up. Show that the probability the other side is black is now 0.5. Use the counting method, as before.
 
-Lecture notes (*insert link*)
 
-Lab notes (*insert link*)
+::: {.callout-note collapse="true"}
+## counting probabilities
+
+ways to get a black card:
+
+all-white card =\> 0 \* 3 (sampling) =  0 
+
+B/W card =\> 1 \* 2 (sampling) = 2 
+
+B/B card =\> 2 \* 1 (sampling) = 2
+
+total 4
+
+coming from the B/B card = 2/4 = 0.5
+:::
+
+# 2M7.
+
+Assume again the original card problem, with a single card showing a black side face up. Before looking at the other side, we draw another card from the bag and lay it face up on the table. The face that is shown on the new card is white. Show that the probability that the first card, the one showing a black side, has black on its other side is now 0.75. Use the counting method, if you can. Hint: Treat this like the sequence of globe tosses, counting all the ways to see each observation, for each possible first card.
+
+Round 1: black Round 2: white Total ww =\> 2 ww =\> 0 bw =\> 1 0 bb =\> 0
+
+```         
+                        ww => 2
+```
+
+bw =\> 1 bw =\> 0 2 bb =\> 0
+
+```         
+                        ww => 2
+```
+
+bb =\> 2 bw =\> 1 4 + 2 = 6 bb =\> 0
+
+p(round1 = bb) =\> 6/8 = 0.75
+
+2H1. Suppose there are two species of panda bear. Both are equally common in the wild and live in the same places. They look exactly alike and eat the same food, and there is yet no genetic assay capable of telling them apart. They differ however in their family sizes. Species A gives birth to twins 10% of the time, otherwise birthing a single infant. Species B births twins 20% of the time, otherwise birthing singleton infants. Assume these numbers are known with certainty, from many years of field research. Now suppose you are managing a captive panda breeding program. You have a new female panda of unknown species, and she has just given birth to twins. What is the probability that her next birth will also be twins?
+
+p(t\|A) = 0.1 p(t\|B) = 0.2 p(A) = p(B) = 0.5
+
+```{r 2H1}
+# get the posterior for the first twins
+p_A <- 0.5
+p_B <- 0.5
+
+p_t_given_A <- 0.1 # probab of twins at any time
+p_t_given_B <- 0.2
+
+p_A_given_t1 <-  p_t_given_A * p_A / (p_A*p_t_given_A + p_B * p_t_given_B)
+p_A_new_prior <- p_A_given_t1
+
+
+p_B_given_t1 <-  p_t_given_B * p_B / (p_A*p_t_given_A + p_B * p_t_given_B)
+p_B_new_prior <- p_B_given_t1
+
+# probability of getting twins againg = likelyhood  of seeing twins given A  + seeing twins given B
+
+
+p_t2_given_A <-  p_A_new_prior * p_t_given_A
+
+p_t2_given_B <- p_B_new_prior * p_t_given_B
+
+
+result <- p_t2_given_A + p_t2_given_B
+
+
+```
+
+# 2H2.
+
+Recall all the facts from the problem above. Now compute the probability that the panda we have is from species A, assuming we have observed only the first birth and that it was twins.
+
+```{r 2H2}
+p_A_given_t1
+```
+
+# 2H3.
+
+Continuing on from the previous problem, suppose the same panda mother has a second birth and that it is not twins, but a singleton infant. Compute the posterior probability that this panda is species A.
+
+```{r 2H3}
+p_A_new_prior
+p_B_new_prior
+
+
+p_t_given_A <- 0.1 # probab of twins at any time
+p_t_given_B <- 0.2
+
+
+p_nt_given_A <- 1 - p_t_given_A
+p_nt_given_B <- 1 - p_t_given_B
+
+
+p_A_given_nt2 <- (p_nt_given_A * p_A_new_prior) / (p_nt_given_A * p_A_new_prior + p_nt_given_B * p_B_new_prior)
+p_A_newest_prior <- p_A_given_nt2
+
+p_B_given_nt2 <- (p_nt_given_B * p_B_new_prior) / (p_nt_given_A * p_A_new_prior + p_nt_given_B * p_B_new_prior)
+p_B_newest_prior <- p_B_given_nt2
+```
+
+# 2H4.
+
+A common boast of Bayesian statisticians is that Bayesian inference makes it easy to use all of the data, even if the data are of different types. So suppose now that a veterinarian comes along who has a new genetic test that she claims can identify the species of our mother panda. But the test, like all tests, is imperfect. This is the information you have about the test:
+
+• The probability it correctly identifies a species A panda is 0.8. • The probability it correctly identifies a species B panda is 0.65.
+
+The vet administers the test to your panda and tells you that the test is positive for species A. First ignore your previous information from the births and compute the posterior probability that your panda is species A. Then redo your calculation, now using the birth data as well.
+
+p(testA\|A) = 0.8 p(testB\|B) = 0.65
+
+```{r 2H4}
+# without the info from the births: 
+p_A <- 0.5
+p_B <- 0.5
+
+p_testA_given_A <- 0.8
+p_testB_given_B <- 0.65
+
+p_A_given_testA <- (p_testA_given_A * p_A ) / (p_testA_given_A * p_A  + # correct test result
+                                                 (1 - p_testB_given_B) * p_B) # false positive for A
+
+
+# now with the birth knowledge
+
+p_A_newest_prior
+p_B_newest_prior
+
+
+p_A_given_testA_2 <- (p_testA_given_A * p_A_newest_prior ) / (p_testA_given_A * p_A_newest_prior  + # correct test result
+                                                 (1-p_testB_given_B) * p_B_newest_prior) # false positive for A
+
+
+
+```
