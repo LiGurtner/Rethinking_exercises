@@ -30,6 +30,56 @@ theme_set(theme_tidybayes())
 
 ```
 
+# 4E1. 
+
+In the model definition below, which line is the likelihood? 
+
+*yi ∼ Normal(μ, σ)*
+
+μ ∼ Normal(0, 10) 
+
+σ ∼ Exponential(1)
+
+# 4E2. 
+
+In the model definition just above, how many parameters are in the posterior distribution?
+
+=> 2
+
+
+# 4E3. 
+
+Using the model definition above, write down the appropriate form of Bayes’ theorem that includes the proper likelihood and priors.
+
+
+\[
+\Pr(\mu, \sigma \mid y_{i}) = \frac{\prod_i \text{Normal}(y_i \mid \mu, \sigma) \text{Normal}(\mu \mid 0, 10) \text{Exponential}(\sigma \mid 1)}{\int \int \prod_i \text{Normal}(y_i \mid \mu, \sigma) \text{Normal}(\mu \mid 0, 10) \text{Exponential}(\sigma \mid 1) \, d\mu \, d\sigma}
+\]
+
+
+# 4E4. 
+
+In the model definition below, which line is the linear model? 
+
+yi ∼ Normal(μ, σ) 
+
+*μi = α + βxi*
+
+α ∼ Normal(0, 10) 
+
+β ∼ Normal(0, 1) 
+
+σ ∼ Exponential(2)
+
+
+# 4E5. 
+
+In the model definition just above, how many parameters are in the posterior distribution?
+
+=> 3
+
+
+
 # 4M1. 
 For the model definition below, simulate observed y values from the prior (not the posterior). 
 
