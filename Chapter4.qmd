@@ -301,6 +301,99 @@ plot(m4.3_original_2) # intecept from the uncentered is lower
 ```
 
 
+# 4M8. 
+In the chapter, we used 15 knots with the cherry blossom spline. Increase the number of knots and observe what happens to the resulting spline. Then adjust also the width of the prior on the weights—change the standard deviation of the prior and watch what happens. What do you think the combination of knot number and the prior on the weights controls?
+
+
+```{r}
+
+# the code for the model is quite long and to do this exercise, we need to play around with values and re-run all of the code. => perfect opportunity for a function. 
+cher <- read.csv("https://raw.githubusercontent.com/rmcelreath/rethinking/refs/heads/master/data/cherry_blossoms.csv", sep = ";")
+
+
+do_splines <- function(n_knots = 15, 
+                       width_prior = 10){
+    
+  # following the code from Solomon Kurz: https://bookdown.org/content/4857/geocentric-models.html#splines.
+  
+  d2 <-
+    cher |> 
+    drop_na(doy) # drop incomplete lines
+  
+  num_knots <- n_knots # this needs to be played around with
+  knot_list <- quantile(d2$year, probs = seq(from = 0, to = 1, length.out = num_knots)) # placing the knots at data-informed locations
+  
+  B <- splines::bs(d2$year,
+          knots = knot_list[-c(1, num_knots)], 
+          degree = 3, 
+          intercept = TRUE) # make the knots
+  
+  
+  d3 <-
+    d2 |> 
+    mutate(B = B) # add the knots to the data-frame
+  
+  # some wrangling
+  
+  n_cols <- n_knots +2
+  b <-
+    B  |>  
+    data.frame() |>  
+    set_names(str_c(0, 1:9), 10:n_cols) |>   
+    bind_cols(select(d2, year))  |>  
+    pivot_longer(-year,
+                 names_to = "bias_function",
+                 values_to = "bias")
+  
+  
+  
+  # fit the model
+  local_width_prior <- as.character(width_prior)
+  b4.8 <- 
+    brm(data = d3,
+        family = gaussian,
+        doy ~ 1 + B,
+        prior = c(prior(normal(100, 10), class = Intercept),
+                  prior_string(paste0("normal(0, ",local_width_prior,")"), class = "b"), # these are the widths of the prior, that should be played with for the exercise, therefore, we define this prior as strings
+                  prior(exponential(1), class = sigma)),
+        iter = 2000, warmup = 1000, chains = 4, cores = 4,
+        seed = 4)
+  
+  
+  # visualize the spline
+  
+  f <- fitted(b4.8)  |>  
+    data.frame()  |>  
+    bind_cols(d2)  |>  
+    
+    ggplot(aes(x = year, y = doy, ymin = Q2.5, ymax = Q97.5)) + 
+    geom_vline(xintercept = knot_list, color = "white", alpha = 1/2) +
+    geom_hline(yintercept = fixef(b4.8)[1, 1], color = "white", linetype = 2) +
+    geom_point(color = "#ffb7c5", alpha = 1/2) +
+    geom_ribbon(fill = "white", alpha = 2/3) +
+    labs(x = "year",
+         y = "day in year") +
+    theme_bw() +
+    theme(panel.background = element_rect(fill = "#4f455c"),
+          panel.grid = element_blank())
+  
+  return(f)
+}
+
+
+k15_w10 <- do_splines()
+
+k100_w10 <- do_splines(n_knots = 100)
+
+k15_w20 <- do_splines(width_prior = 20)
+
+k15_w1 <- do_splines(width_prior = 1)
+
+
+```
+
+
+=> both control in different ways the wigglyness of the line. The n_knows allows for short intervals of the predictor, which makes the line quite adaptive. The width of the weights again gives adaptiveness: the wider the prior of the width of the weights, the more flexible the line. 
 
 # 4H1
 The weights listed below were recorded in the !Kung census, but heights were not recorded for these individuals. Provide predicted heights and 89% intervals for each of these individuals. That is, fill in the table below, using model-based predictions. Individual weight expected height 89% interval 1 46.95 2 43.72 3 64.78 4 32.59 5 54.63
