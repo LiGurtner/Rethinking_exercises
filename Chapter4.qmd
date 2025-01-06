@@ -458,9 +458,9 @@ Select out all the rows in the Howell1 data with ages below 18 years of age. If 
 
 (c) What aspects of the model fit concern you? Describe the kinds of assumptions you would change, if any, to improve the model. You don’t have to write any new code. 
 
-- the lower and upper extremes of weight are not fitted well by this model, the middle part seems to be ok. 
+- the lower and upper extremes of weight are overestimated, the middle part is underestimated
 - parameter correlation seems to be ok. 
-- probably splines would do better, one with a knot at mu-12 and then one at mu+12, or a thrid grade polinomial
+- probably splines would do better, one with a knot at mu-10 and then one at mu+12, or a thrid grade polinomial. 
 
 
 
@@ -534,8 +534,80 @@ as_draws_df(h2_kids)  |>
   cor() |>
   round(digits = 2)
 
-
-
 ```
 
 
+
+# 4H3. 
+
+Suppose a colleauge of yours, who works on allometry, glances at the practice problems just above. Your colleague exclaims, “That’s silly. Everyone knows that it’s only the logarithm of body weight that scales with height!” Let’s take your colleague’s advice and see what happens.
+
+Model the relationship between height (cm) and the natural logarithm of weight (log-kg). Use the entire Howell1 data frame, all 544 rows, adults and non-adults. Can you interpret the resulting estimates?
+
+```{r}
+
+d <- read.csv("https://raw.githubusercontent.com/rmcelreath/rethinking/refs/heads/master/data/Howell1.csv", sep = ";") #load again data
+
+d_fit <- d |> 
+  mutate(log_weight = log(weight))
+
+hist(d_fit$log_weight)
+
+
+h3_fit <- brm(height ~ 1 + log_weight, 
+                     family = gaussian, 
+                     data = d_fit, 
+                     prior = c(prior(uniform(0, 200), 
+                                     class = Intercept, 
+                                     lb = 0, 
+                                     ub = 200),
+                               prior(normal(0, 10), 
+                                     class = b),     
+                               prior(uniform(0, 50), 
+                                     class = sigma, 
+                                     ub = 50)),
+                     iter = 6000, 
+                     warmup = 3000, 
+                     chains = 4, 
+                     cores = 4,
+                     seed = 4,
+                     file = "fits/b04.h3")
+
+a <- tidy_draws(h3_fit) |> 
+  mutate()
+
+
+
+# look at how the model does: 
+weight_seq <- tibble(log_weight = seq(from = 1, to = 5, by = 1))
+
+pred_height <-
+  predict(h3_fit,
+          newdata = weight_seq) |>
+  as_tibble() |>
+  bind_cols(weight_seq) |> 
+  rename(height = Estimate)
+
+mu_summary <- fitted(h3_fit, 
+         newdata = weight_seq) |>
+  as_tibble() |>
+  # let's tackw on the `weight` values from `weight_seq`
+  bind_cols(weight_seq)
+
+d_fit |> 
+  ggplot(aes(x = exp(log_weight), y = height)) + # transform back to kg
+  
+  geom_ribbon(data = pred_height, 
+              aes(ymin = Q2.5, ymax = Q97.5), 
+              fill = "grey83") + 
+  geom_smooth(data = mu_summary,
+              aes(y = Estimate, ymin = Q2.5, ymax = Q97.5),
+              stat = "identity",
+              fill = "grey70", color = "black", alpha = 1, linewidth = 1/2) +
+  geom_point(alpha = 0.2) 
+```
+
+=> the log-scale tells us about "orders of magnitude" (p.98 in rethinking).
+=> the -23.58 represents the expected height of a person with a log(weight) of 0 kg, that is, the expected height of a person of 1kg. 
+
+=> the 47.02 represents the expected increase in height (cm) as a person increases in weight by log(kg) = 1. 
