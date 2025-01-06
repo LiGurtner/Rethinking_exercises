@@ -396,21 +396,27 @@ k15_w1 <- do_splines(width_prior = 1)
 => both control in different ways the wigglyness of the line. The n_knows allows for short intervals of the predictor, which makes the line quite adaptive. The width of the weights again gives adaptiveness: the wider the prior of the width of the weights, the more flexible the line. 
 
 # 4H1
-The weights listed below were recorded in the !Kung census, but heights were not recorded for these individuals. Provide predicted heights and 89% intervals for each of these individuals. That is, fill in the table below, using model-based predictions. Individual weight expected height 89% interval 1 46.95 2 43.72 3 64.78 4 32.59 5 54.63
+The weights listed below were recorded in the !Kung census, but heights were not recorded for these individuals. Provide predicted heights and 89% intervals for each of these individuals. 
+
+=> That is, fill in the table below, using model-based predictions. Individual weight expected height + 89% interval 
 
 ```{r}
 
-dat <- tibble(centered_weight = c(46.95, 43.72, 64.78, 32.59, 54.63))
+dat <- tibble(weight = c(46.95, 43.72, 64.78, 32.59, 54.63)) |> 
+  mutate(mean_weight = mean(weight), 
+         centered_weight = mean_weight - weight)
+
+d <- read.csv("https://raw.githubusercontent.com/rmcelreath/rethinking/refs/heads/master/data/Howell1.csv", sep = ";") # this is the kung-data from Howell from above, that were used to fit m4.3_original. I thus do not need to refit the model but use the one from M7
 
 
-# i take the orginal model from above
+# do it once "by hand"
 
-samples_model_original <- tidy_draws(m4.3_original) |> 
-  mutate(pred1 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*46.95, sd = sigma), 
-         pred2 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*43.72, sd = sigma), 
-         pred3 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*64.785, sd = sigma), 
-         pred4 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight* 32.5, sd = sigma), 
-         pred5 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*54.63, sd = sigma)
+samples_model_original <- tidy_draws(m4.3_original) |> # get draws from the posterior distribution
+  mutate(pred1 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*1.584, sd = sigma), 
+         pred2 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*4.814, sd = sigma), 
+         pred3 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*-16.246, sd = sigma), 
+         pred4 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight* 15.944, sd = sigma), 
+         pred5 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*-6.096, sd = sigma)
          )
 
 result <- samples_model_original |> 
@@ -418,20 +424,23 @@ result <- samples_model_original |>
   pivot_longer(1:5, names_to = "person", values_to = "height_pred") |> 
   group_by(person) 
 
-
 result |> 
   ggplot(aes(x = height_pred)) + geom_density() + facet_grid(. ~ person)
 
+result |> 
+  summarise(estimate = mode_hdi(height_pred)$y, 
+            interval = hdi(height_pred, width = 0.89))
 
-
+# and again with the predict function from brms
 pred_height <-
   predict(m4.3_original,
-          newdata = dat, summary = T)
-|>
-  as_tibble()
-|>
-  bind_cols(weight_seq)
-  
+          newdata = dat, 
+          summary = T, 
+          probs = c(0.055, 0.945) )
+
+# the two methods lead to sightly different numbers. this is because both version have stochastic processes, visible in the "by hand" version, where we use rnorm(). 
+
+
 ```
 
 
