@@ -451,11 +451,14 @@ Select out all the rows in the Howell1 data with ages below 18 years of age. If 
 
 (a) Fit a linear regression to these data, using quap. Present and interpret the estimates. For every 10 units of increase in weight, how much taller does the model predict a child gets? 
 
+*When a child gains 10 kg, it will be 27.2 cm taller.*
+
+
 (b) Plot the raw data, with height on the vertical axis and weight on the horizontal axis. Superimpose the MAP regression line and 89% interval for the mean. Also superimpose the 89% interval for predicted heights. 
 
 (c) What aspects of the model fit concern you? Describe the kinds of assumptions you would change, if any, to improve the model. You don’t have to write any new code. 
 
-- the lower and upper hights are not fitted well by this model, the middle part seems to be ok. 
+- the lower and upper extremes of weight are not fitted well by this model, the middle part seems to be ok. 
 - parameter correlation seems to be ok. 
 - probably splines would do better, one with a knot at mu-12 and then one at mu+12, or a thrid grade polinomial
 
@@ -463,6 +466,7 @@ Select out all the rows in the Howell1 data with ages below 18 years of age. If 
 
 ```{r}
 
+d <- read.csv("https://raw.githubusercontent.com/rmcelreath/rethinking/refs/heads/master/data/Howell1.csv", sep = ";") #load again data
 d_kids <- d |> 
   filter(age < 18) |>  # correct
   mutate(mean_weight = mean(weight),
@@ -471,13 +475,19 @@ d_kids <- d |>
 
 hist(d_kids$weight)
 # a)
-m4.3_kids <- brm(height ~ 1 + centered_weight, 
+h2_kids <- brm(height ~ 1 + centered_weight, 
                      family = gaussian, 
                      data = d_kids, 
-                     prior = c(prior(uniform(0, 200), class = Intercept, lb = 0),
-                               prior(normal(0, 10), class = b),     
-                               # Franca 155 => 40kg , Emil 145 => 30
-                               prior(uniform(0, 50), class = sigma, ub = 50)),
+                     prior = c(prior(uniform(0, 200), 
+                                     class = Intercept, 
+                                     lb = 0, 
+                                     ub = 200),
+                               prior(normal(0, 10), 
+                                     class = b),     
+                               # mykid1 155 => 40kg , mykid2 145 => 30
+                               prior(uniform(0, 50), 
+                                     class = sigma, 
+                                     ub = 50)),
                      iter = 6000, 
                      warmup = 3000, 
                      init = 0,
@@ -486,25 +496,21 @@ m4.3_kids <- brm(height ~ 1 + centered_weight,
                      seed = 4,
                      file = "fits/b04.03_kids")
 
- as_draws_df(m4.3_original) |>
-  select(b_Intercept:sigma) |>
-  cor() |>
-  round(digits = 2)
-
+# b)
 # plotting 
- weight_seq <- tibble(centered_weight = seq(from = -20, to = 30, by = 1))
+weight_seq <- tibble(centered_weight = seq(from = -20, to = 30, by = 1))
 
 pred_height <-
-  predict(m4.3_kids,
+  predict(h2_kids,
           newdata = weight_seq) |>
   as_tibble() |>
   bind_cols(weight_seq) |> 
   rename(height = Estimate)
 
-mu_summary <- fitted(m4.3_kids, 
+mu_summary <- fitted(h2_kids, 
          newdata = weight_seq) |>
   as_tibble() |>
-  # let's tack on the `weight` values from `weight_seq`
+  # let's tackw on the `weight` values from `weight_seq`
   bind_cols(weight_seq)
 
 d_kids |> 
@@ -521,8 +527,12 @@ d_kids |>
 
 
 
-
-
+# c)
+# look at correlations
+as_draws_df(h2_kids)  |>  
+  select(b_Intercept:sigma) |>
+  cor() |>
+  round(digits = 2)
 
 
 
