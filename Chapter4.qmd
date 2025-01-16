@@ -129,7 +129,7 @@ test_model_100 <- brm(formula = formula,
                   family = gaussian(), 
                   prior = prior, 
                   data = test_data, 
-                  sample_prior = T)
+                  file = "fits/4m2")
 
 plot(test_model_100) # check if chains have mixed well
 
@@ -149,7 +149,7 @@ test_model_10000 <- brm(formula = formula,
                   family = gaussian(), 
                   prior = prior, 
                   data = test_data_2, 
-                  sample_prior = T)
+                  file = "fits/4m2b")
 
 plot(test_model_10000)
 
@@ -380,14 +380,14 @@ do_splines <- function(n_knots = 15,
   return(f)
 }
 
-
-k15_w10 <- do_splines()
-
-k100_w10 <- do_splines(n_knots = 100)
-
-k15_w20 <- do_splines(width_prior = 20)
-
-k15_w1 <- do_splines(width_prior = 1)
+# run this on your own machine
+# k15_w10 <- do_splines()
+# 
+# k100_w10 <- do_splines(n_knots = 100)
+# 
+# k15_w20 <- do_splines(width_prior = 20)
+# 
+# k15_w1 <- do_splines(width_prior = 1)
 
 
 ```
@@ -398,25 +398,27 @@ k15_w1 <- do_splines(width_prior = 1)
 # 4H1
 The weights listed below were recorded in the !Kung census, but heights were not recorded for these individuals. Provide predicted heights and 89% intervals for each of these individuals. 
 
-=> That is, fill in the table below, using model-based predictions. Individual weight expected height + 89% interval 
+=> That is, fill in the table below, using model-based predictions. Individual expected height + 89% interval 
 
 ```{r}
 
 dat <- tibble(weight = c(46.95, 43.72, 64.78, 32.59, 54.63)) |> 
   mutate(mean_weight = mean(weight), 
-         centered_weight = mean_weight - weight)
+         centered_weight = weight - mean_weight)
 
 d <- read.csv("https://raw.githubusercontent.com/rmcelreath/rethinking/refs/heads/master/data/Howell1.csv", sep = ";") # this is the kung-data from Howell from above, that were used to fit m4.3_original. I thus do not need to refit the model but use the one from M7
 
 
 # do it once "by hand"
 
-samples_model_original <- tidy_draws(m4.3_original) |> # get draws from the posterior distribution
-  mutate(pred1 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*1.584, sd = sigma), 
-         pred2 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*4.814, sd = sigma), 
-         pred3 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*-16.246, sd = sigma), 
-         pred4 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight* 15.944, sd = sigma), 
-         pred5 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*-6.096, sd = sigma)
+samples_model_original <- tidy_draws(m4.3_original)|> # get draws from the posterior distribution
+  mutate(
+    pred1 = rnorm(n = n(), 
+                       mean =  b_Intercept + b_centered_weight*- 1.584, sd = sigma), 
+         pred2 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*- 4.814, sd = sigma), 
+         pred3 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*16.246, sd = sigma), 
+         pred4 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight* -15.944, sd = sigma), 
+         pred5 = rnorm(n = n(), mean =  b_Intercept + b_centered_weight*6.096, sd = sigma)
          )
 
 result <- samples_model_original |> 
@@ -478,11 +480,11 @@ hist(d_kids$weight)
 h2_kids <- brm(height ~ 1 + centered_weight, 
                      family = gaussian, 
                      data = d_kids, 
-                     prior = c(prior(uniform(0, 200), 
+                     prior = c(prior(uniform(42, 200), 
                                      class = Intercept, 
-                                     lb = 0, 
+                                     lb = 42, 
                                      ub = 200),
-                               prior(normal(0, 10), 
+                               prior(normal(0, 10), # or a lognormal
                                      class = b),     
                                # mykid1 155 => 40kg , mykid2 145 => 30
                                prior(uniform(0, 50), 
@@ -540,24 +542,92 @@ as_draws_df(h2_kids)  |>
 
 # 4H3. 
 
-Suppose a colleauge of yours, who works on allometry, glances at the practice problems just above. Your colleague exclaims, “That’s silly. Everyone knows that it’s only the logarithm of body weight that scales with height!” Let’s take your colleague’s advice and see what happens.
+Suppose a collegue of yours, who works on allometry, glances at the practice problems just above. Your colleague exclaims, “That’s silly. Everyone knows that it’s only the logarithm of body weight that scales with height!” Let’s take your colleague’s advice and see what happens.
 
+## a.1)
+ 
 Model the relationship between height (cm) and the natural logarithm of weight (log-kg). Use the entire Howell1 data frame, all 544 rows, adults and non-adults. Can you interpret the resulting estimates?
 
-```{r}
+=> The text only talks about using the natural log, no mentioning of centralization. First let's illutrate the data and the log-function. The log-scale tells us about "orders of magnitude" (p.98 in rethinking). That is, an increase in the log-scale of weight of one equals to a doubling of the weight.
+
+```{r echo = F}
+
+#|echo: FALSE
 
 d <- read.csv("https://raw.githubusercontent.com/rmcelreath/rethinking/refs/heads/master/data/Howell1.csv", sep = ";") #load again data
 
 d_fit <- d |> 
   mutate(log_weight = log(weight))
 
-hist(d_fit$log_weight)
+line_data <- tibble(x = seq(from = 0.5, to = 101, length.out = 10000), y = log(x))
+
+helping_lines1 <- data.frame(x1 = 0, 
+                            y1 = log(1), 
+                            x2 = 1, 
+                            y2 = log(1))
+
+helping_lines2 <- data.frame(x1 = 0, 
+                            y1 = log(10), 
+                            x2 = 10, 
+                            y2 = log(10))
+
+helping_lines3 <- data.frame(x1 = 0, 
+                            y1 = log(100), 
+                            x2 = 100, 
+                            y2 = log(100))
 
 
+helping_lines4 <- data.frame(x1 = 1, 
+                            y1 = 0, 
+                            x2 = 1, 
+                            y2 = log(1))
+
+helping_lines5 <- data.frame(x1 = 10, 
+                            y1 = 0, 
+                            x2 = 10, 
+                            y2 = log(10))
+
+helping_lines6 <- data.frame(x1 = 100, 
+                            y1 = 0, 
+                            x2 = 100, 
+                            y2 = log(100))
+
+
+
+d_fit |> 
+  ggplot(aes(x = weight, y = log_weight)) + 
+  geom_point() + 
+  geom_line(data = line_data, 
+              aes(x = x, y = y)) + 
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), color = "grey", data = helping_lines1, linetype = 2) +
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), color = "grey", data = helping_lines2, linetype = 2) +
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), color = "grey", data = helping_lines3, linetype = 2) +
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), color = "grey", data = helping_lines4, linetype = 2) +
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), color = "grey", data = helping_lines5, linetype = 2) +
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), color = "grey", data = helping_lines6, linetype = 2) + 
+  geom_hline(yintercept = 0)  +
+  scale_x_continuous(breaks = c(0, 1, 10, 50, 100)) + 
+  scale_y_continuous(breaks = c(0, 1, 2, round(log(10),2), 3, 4, round(log(100), 2)))
+
+
+
+```
+
+Now fit the model. We adapt the prior to make it give plausable values on the log(weight) scale. The additive part of the formula is: 
+
+mu = a + b * log(weight)
+
+the priors for a and b must therefore be consistent with the log-transformation of the weight to generate average expected heights in cm. `a` indicates the hight of a person that has a log(weight) = 0, which corresponds to a weight of 1: log(1) = : `r log(1)`. 
+
+For the intercept `a`, we use a uniform(20, 100) prior, which corresponds to a height of for a person  with a weight of 1 kg (a person who's `log(weight) = 0`). 
+
+For the slope `b`, we follow along with the normal(0,10). 
+
+```{r}
 h3_fit <- brm(height ~ 1 + log_weight, 
                      family = gaussian, 
                      data = d_fit, 
-                     prior = c(prior(uniform(0, 200), 
+                     prior = c(prior(uniform(0, 200), # we change this to adapt it to the log data
                                      class = Intercept, 
                                      lb = 0, 
                                      ub = 200),
@@ -571,15 +641,83 @@ h3_fit <- brm(height ~ 1 + log_weight,
                      chains = 4, 
                      cores = 4,
                      seed = 4,
-                     file = "fits/b04.h3")
+                     sample_prior = T,
+                     file = "fits/b04.h3_b_log")
 
-a <- tidy_draws(h3_fit) |> 
-  mutate()
+summary(h3_fit)
+
+as_draws_df(h3_fit) |> 
+  as_tibble()|> 
+  select(b_Intercept, b_log_weight, sigma) |>
+  cov() |>
+  round(digits = 3)
+
+```
+
+
+=> the intercept `r -23.58` represents the expected height of a person with a log(weight) = 0 kg, that is, the expected height of a person of 1kg. This is if course unrealistic. 
+
+=> the slope `r 47.02` represents the expected increase in height (cm) as a person increases in weight by 1 on the log(weight scale), that is by one order of magnitude in weight. Thus, from 1kg to 10 kg, the model would predict an increase of 47.02 cm of height. From another increase in weight from 10 kg to 100 kg, the model would predict another growth of 47.02 cm. 
+
+However we might want to center the log(weight), since this lead to better model fit in the past. Also, the correlation between log_weight and intercept is quite substanital. We center the log(weight) around it's mean (which is not the same as the mean(weight)). 
+
+
+## a.2)
+```{r}
+d_fit <- d|> 
+  mutate(log_weight = log(weight),
+         mean_log_weight = mean(log_weight), 
+         centr_log_weight = log_weight - mean_log_weight)
+
+h3_fit2 <- brm(height ~ 1 + centr_log_weight, 
+                     family = gaussian, 
+                     data = d_fit, 
+                     prior = c(prior(uniform(42, 200), 
+                                     class = Intercept, 
+                                     lb = 0, 
+                                     ub = 200),
+                               prior(normal(0, 10), 
+                                     class = b),     
+                               prior(uniform(0, 50), 
+                                     class = sigma, 
+                                     ub = 50)),
+                     iter = 6000, 
+                     warmup = 3000, 
+                     chains = 4, 
+                     cores = 4,
+                     seed = 4,
+                     sample_prior = T,
+                     file = "fits/b04.h3_b_log_centered")
+
+summary(h3_fit2)
+
+as_draws_df(h3_fit2) |> 
+  as_tibble() |> 
+  select(b_Intercept, b_centr_log_weight, sigma) |>
+  cov() |>
+  round(digits = 3)
+
+```
+
+=> the correlation between b_centr_log_weight and intercept is now much smaller. 
+
+=> The intercept of `138.27` shows the height of a person who's log(weight) == mean(log(weight)) = `r `unique(d_fit$mean_log_weight)`. This corresponds to the expected hight of a person with a weight of `exp(unique(d_fit$mean_log_weight))` kg. 
+
+=> the slope `47.01` indicates how much one person is expected to grow when they go up one unit the centered log_weights. This means for example: 
+
+- from increase in weight from centralized_log_weight = 0 (corresponds to 31 kg) to centralized_log_weight = 1 (that is a log_weight of 4.44233 and a weight of exp(log_weight) of `r exp(4.44233)`), we would expect a person to be 47.01 cm higher than the intercept, i.e. have a height of 185.28 cm. 
+
+- if a person is one centralized-log-weight-unit lighter than avearage (this corresponds to a log_weight of 2.44233 and a weight of exp(log_weight) of `r exp(2.44233)`), we would predict this person to be 138.27 - 47.01  = 91.26 cm small.
 
 
 
-# look at how the model does: 
-weight_seq <- tibble(log_weight = seq(from = 1, to = 5, by = 1))
+## b) 
+Begin with this plot: plot( height ~ weight , data = Howell1 ). Then use samples from the quadratic approximate posterior of the model in (a) to superimpose on the plot: (1) the predicted mean height as a function of weight, (2) the 97% interval for the mean, and (3) the 97% interval for predicted heights.
+```{r}
+# plot both centralized and uncentralized data, and alsa plot the predictions on the log-scale and on the normal scale. 
+
+# uncentralized
+weight_seq <- tibble(log_weight = c(1, 2, 3, 4, 4.2))
 
 pred_height <-
   predict(h3_fit,
@@ -594,7 +732,19 @@ mu_summary <- fitted(h3_fit,
   # let's tackw on the `weight` values from `weight_seq`
   bind_cols(weight_seq)
 
-d_fit |> 
+uc_log <-  d_fit |> 
+  ggplot(aes(x = log_weight, y = height)) + # transform back to kg
+  
+  geom_ribbon(data = pred_height, 
+              aes(ymin = Q2.5, ymax = Q97.5), 
+              fill = "grey83") + 
+  geom_smooth(data = mu_summary,
+              aes(y = Estimate, ymin = Q2.5, ymax = Q97.5),
+              stat = "identity",
+              fill = "grey70", color = "black", alpha = 1, linewidth = 1/2) +
+  geom_point(alpha = 0.2) 
+
+uc_real <- d_fit |> 
   ggplot(aes(x = exp(log_weight), y = height)) + # transform back to kg
   
   geom_ribbon(data = pred_height, 
@@ -605,9 +755,59 @@ d_fit |>
               stat = "identity",
               fill = "grey70", color = "black", alpha = 1, linewidth = 1/2) +
   geom_point(alpha = 0.2) 
+
+
+# centralized
+weight_seq <- tibble(centr_log_weight = c(-3, -2, 1, 0, 1))
+
+pred_height <-
+  predict(h3_fit2,
+          newdata = weight_seq) |>
+  as_tibble() |>
+  bind_cols(weight_seq) |> 
+  rename(height = Estimate)
+
+mu_summary <- fitted(h3_fit2, 
+         newdata = weight_seq) |>
+  as_tibble() |>
+  # let's tackw on the `weight` values from `weight_seq`
+  bind_cols(weight_seq)
+
+c_log <-  d_fit |> 
+  ggplot(aes(x = centr_log_weight, y = height)) + # transform back to kg
+  
+  geom_ribbon(data = pred_height, 
+              aes(ymin = Q2.5, ymax = Q97.5), 
+              fill = "grey83") + 
+  geom_smooth(data = mu_summary,
+              aes(y = Estimate, ymin = Q2.5, ymax = Q97.5),
+              stat = "identity",
+              fill = "grey70", color = "black", alpha = 1, linewidth = 1/2) +
+  geom_point(alpha = 0.2) 
+
+c_real <- d_fit |> 
+  ggplot(aes(x = exp(centr_log_weight), y = height)) + # transform back to kg
+  
+  geom_ribbon(data = pred_height, 
+              aes(ymin = Q2.5, ymax = Q97.5), 
+              fill = "grey83") + 
+  geom_smooth(data = mu_summary,
+              aes(y = Estimate, ymin = Q2.5, ymax = Q97.5),
+              stat = "identity",
+              fill = "grey70", color = "black", alpha = 1, linewidth = 1/2) +
+  geom_point(alpha = 0.2) 
+
+
+
+cowplot::plot_grid(uc_log, c_log, uc_real, c_real, 
+                   nrow = 2, 
+                   ncol = 2,
+                   labels = c("uncentered, log", "centered, log", "uncentered, real", "centered, real"))
+
 ```
 
-=> the log-scale tells us about "orders of magnitude" (p.98 in rethinking).
-=> the -23.58 represents the expected height of a person with a log(weight) of 0 kg, that is, the expected height of a person of 1kg. 
+# 4H4
+Plot the prior predictive distribution for the parabolic polynomial regression model in the chapter. You can modify the code that plots the linear regression prior predictive distribution. Can you modify the prior distributions of α, β1, and β2 so that the prior predictions stay within the biologically reasonable outcome space? That is to say: Do not try to fit the data by hand. But do try to keep the curves consistent with what you know about height and weight, before seeing these exact data.
 
-=> the 47.02 represents the expected increase in height (cm) as a person increases in weight by log(kg) = 1. 
+
+H6 
